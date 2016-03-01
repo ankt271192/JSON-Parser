@@ -1,3 +1,13 @@
+//var test6 = "\t \n \r    123";
+
+function skipSpace(string){
+	var first = string.search(/\S/);
+	if (first == -1) return "";
+	return string.slice(first);
+}
+
+//console.log(skipSpace(test6));
+
 //var test1 = "3.14,\nabc";
 
 function numberParser(input){
@@ -54,7 +64,7 @@ function nullParser(input){
 
 //console.log(nullParser(test4));
 
-//var test5 = '[ 1,true,null,"abc" ]';
+//var test5 = '[ 1,true,null,"abc",{ "x": 3.14, "st": "str" } ]';
 
 function arrayParser(input){
 	var ar, match;
@@ -70,7 +80,7 @@ function arrayParser(input){
 			match = jsonParser(input);
 			//console.log(match);
 			ar.push(match.token);
-			input = match.rest;
+			input = skipSpace(match.rest);
 		}
 		return { token: ar, rest: input.slice(1) };
 	}
@@ -80,17 +90,36 @@ function arrayParser(input){
 
 //console.log(arrayParser(test5));
 
+//var test7 = '{ "x": 1, "y": "abc", "a": 3.14, "obj":{ "x": 3.14, "y": "str" }, "ar": [1,2,3,[3.14] ]    }';
+
 function objectParser(input){
 	//parses the object
+	var obj, key, value;
+	input = skipSpace(input);
+	if(/^\{/.test(input)){
+		obj = {};
+		input = input.slice(1);
+		//console.log(input);
+		while(input[0] != "}"){
+			input = skipSpace(input);
+			if(input[0] == ",")
+				input = input.slice(1);
+			key = stringParser(input);
+			input = skipSpace(key.rest);
+			if(input[0] == ":")
+				input = input.slice(1);
+			value = jsonParser(input);
+			input = skipSpace(value.rest);
+			obj[key.token] = value.token;
+			//console.log(input);
+		}
+		return { token: obj, rest: input.slice(1) };
+	}
+	else
+		return null;
 }
 
-//var test6 = " 123";
-
-function skipSpace(input){
-	return input.trim();
-}
-
-//console.log(skipSpace(test6));
+//console.log(objectParser(test7));
 
 function jsonParser(input){
 	//parses the JSON input and returns the output.
@@ -113,8 +142,10 @@ function jsonParser(input){
 	else if (match = objectParser(input)) {
 		return match;
 	}
+	else
+		return null;
 }
-
+/*
 console.log(jsonParser('true,'));
 console.log(jsonParser('false,'));
 console.log(jsonParser('123'));
@@ -122,13 +153,13 @@ console.log(jsonParser('1.34'));
 console.log(jsonParser('"abc"'));
 console.log(jsonParser('null'));
 console.log(jsonParser(' []'));
-console.log(jsonParser('[1, "abc",  null, true, false, [1,2,3] ]'));
-
+console.log(jsonParser('[ 1, 3.14,  "abc"  ,null ,true,false , [1,2,3], [4,  5 ,6] ]'));
+*/
 var input = {
 	x: 2,
 	str: "abc",
 	flag: true,
-	ar: [1,"str",null,false,1.45,1.8e10,{x:12,y:44},[.2,.4]],
+	ar: [1,"str",null,false,1.45,1.8e10,{x:12,y:44},[0.2,0.4]],
 	obj: {
 			y: 4,
 			st: "cde",
@@ -136,3 +167,4 @@ var input = {
 		}
 	};
 var test = JSON.stringify(input,null,"\t");
+console.log(test,jsonParser(test),JSON.parse(test));
