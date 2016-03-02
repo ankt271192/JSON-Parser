@@ -1,3 +1,6 @@
+var fs = require("fs");
+var data = fs.readFileSync("data.txt").toString();
+
 //var test6 = "\t \n \r    123";
 
 function skipSpace(string){
@@ -21,13 +24,14 @@ function numberParser(input){
 
 //console.log(numberParser(test1));
 
-//var test2 = '"abc" 123';
+//var test2 = '"abc\r\n xyz"';
 
 function stringParser(input){
 	var token;
 	input = skipSpace(input);
-	if (token = /^"([^"]*)"/.exec(input))
-		return { token: token[1], rest: input.slice(token[0].length) };
+	if (token = /^"([^"]*)"/.exec(input)){
+		console.log(token[1]);
+		return { token: token[1], rest: input.slice(token[0].length) };}
 	else
 		return null;
 }
@@ -64,7 +68,7 @@ function nullParser(input){
 
 //console.log(nullParser(test4));
 
-//var test5 = '[ 1,true,null,"abc",{ "x": 3.14, "st": "str" } ]';
+//var test5 = '[ 1,true,null,"abc\r\n xyz",{ "x": 3.14, "st": "str" } ]';
 
 function arrayParser(input){
 	var ar, match;
@@ -90,7 +94,7 @@ function arrayParser(input){
 
 //console.log(arrayParser(test5));
 
-//var test7 = '{ "x": 1, "y": "abc", "a": 3.14, "obj":{ "x": 3.14, "y": "str" }, "ar": [1,2,3,[3.14] ]    }';
+//var test7 = '{ "x": 1, "y": "abc\r\n xyz", "a": 3.14, "obj":{ "x": 3.14, "y": "str\n" }, "ar": [1,2,3,[3.14] ]    }';
 
 function objectParser(input){
 	//parses the object
@@ -155,16 +159,6 @@ console.log(jsonParser('null'));
 console.log(jsonParser(' []'));
 console.log(jsonParser('[ 1, 3.14,  "abc"  ,null ,true,false , [1,2,3], [4,  5 ,6] ]'));
 */
-var input = {
-	x: 2,
-	str: "abc",
-	flag: true,
-	ar: [1,"str",null,false,1.45,1.8e10,{x:12,y:44},[0.2,0.4]],
-	obj: {
-			y: 4,
-			st: "cde",
-			ar: [7,8,9]
-		}
-	};
-var test = JSON.stringify(input,null,"\t");
-console.log(test,jsonParser(test),JSON.parse(test));
+//console.log(data);
+console.log(jsonParser(data).token);
+console.log(JSON.parse(data));
