@@ -1,164 +1,143 @@
+// Reading Data From 'data.txt' 
+
 var fs = require("fs");
 var data = fs.readFileSync("data.txt").toString();
 
-//var test6 = "\t \n \r    123";
+// Removes Whitespaces
 
-function skipSpace(string){
+function skipSpace(string) {
 	var first = string.search(/\S/);
-	if (first == -1) return "";
+	if (first == -1)
+		return "";
 	return string.slice(first);
 }
 
-//console.log(skipSpace(test6));
+// Parses A Number
 
-//var test1 = "3.14,\nabc";
-
-function numberParser(input){
+function numberParser(input) {
 	var token;
 	input = skipSpace(input);
 	if (token = /^[+\-]?(\d+(\.\d*)?|\.\d+)([eE][+\-]?\d+)?/.exec(input))
 		return { token: Number(token[0]), rest: input.slice(token[0].length) };
-	else
-		return null;
+	return null;
 }
 
-//console.log(numberParser(test1));
+// Parses A String
 
-//var test2 = '"abc\r\n xyz"';
-
-function stringParser(input){
+function stringParser(input) {
 	var token;
 	input = skipSpace(input);
-	if (token = /^"([^"]*)"/.exec(input)){
-		console.log(token[1]);
-		return { token: token[1], rest: input.slice(token[0].length) };}
-	else
-		return null;
+	if (token = /^"([^"]*)"/.exec(input))
+		return { token: token[1], rest: input.slice(token[0].length) };
+	return null;
 }
 
-//console.log(stringParser(test2));
+// Parses A Boolean
 
-//var test3 = "true 123";
-
-function boolParser(input){
+function boolParser(input) {
 	var token;
 	input = skipSpace(input);
 	if (token = /^true|^false/.exec(input)) {
 		if(token[0] == "true")
 			return { token: true, rest: input.slice(token[0].length) };
-		else
-			return { token: false, rest: input.slice(token[0].length) };
+		return { token: false, rest: input.slice(token[0].length) };
 	}
-	else
-		return null;
+	return null;
 }
 
-//console.log(boolParser(test3));
+// Parses Null
 
-//var test4 = "null 123";
-
-function nullParser(input){
+function nullParser(input) {
 	var token;
 	input = skipSpace(input);
 	if (token = /^null/.exec(input))
 		return { token: null, rest: input.slice(token[0].length) };
-	else
-		return null;
+	return null;
 }
 
-//console.log(nullParser(test4));
+// Parses An Array
 
-//var test5 = '[ 1,true,null,"abc\r\n xyz",{ "x": 3.14, "st": "str" } ]';
-
-function arrayParser(input){
+function arrayParser(input) {
 	var ar, match;
 	input = skipSpace(input);
-	if (/^\[/.test(input)){
+	if (/^\[/.test(input)) {
 		ar = [];
 		input = input.slice(1);
-		//console.log(input);
-		while(input[0] != "]"){
+		while (input[0] != "]") {
 			input = skipSpace(input);
-			if(input[0] == ",")
+			if (input[0] == ",")
 				input = input.slice(1);
 			match = jsonParser(input);
-			//console.log(match);
 			ar.push(match.token);
 			input = skipSpace(match.rest);
 		}
 		return { token: ar, rest: input.slice(1) };
 	}
-	else
-		return null;
+	return null;
 }
 
-//console.log(arrayParser(test5));
+// Parses An Object
 
-//var test7 = '{ "x": 1, "y": "abc\r\n xyz", "a": 3.14, "obj":{ "x": 3.14, "y": "str\n" }, "ar": [1,2,3,[3.14] ]    }';
-
-function objectParser(input){
-	//parses the object
+function objectParser(input) {
 	var obj, key, value;
 	input = skipSpace(input);
-	if(/^\{/.test(input)){
+	if (/^\{/.test(input)) {
 		obj = {};
 		input = input.slice(1);
-		//console.log(input);
-		while(input[0] != "}"){
+		while (input[0] != "}") {
 			input = skipSpace(input);
-			if(input[0] == ",")
+			if (input[0] == ",")
 				input = input.slice(1);
 			key = stringParser(input);
 			input = skipSpace(key.rest);
-			if(input[0] == ":")
+			if (input[0] == ":")
 				input = input.slice(1);
 			value = jsonParser(input);
 			input = skipSpace(value.rest);
 			obj[key.token] = value.token;
-			//console.log(input);
 		}
 		return { token: obj, rest: input.slice(1) };
 	}
-	else
-		return null;
+	return null;
 }
 
-//console.log(objectParser(test7));
+// Parses the JSON Input And Returns the Output
 
-function jsonParser(input){
-	//parses the JSON input and returns the output.
+function jsonParser(input) {
 	var match;
-	if (match = numberParser(input)){
+	if (match = numberParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else if (match = stringParser(input)){
+	if (match = stringParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else if (match = boolParser(input)){
+	if (match = boolParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else if (match = nullParser(input)){
+	if (match = nullParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else if (match = arrayParser(input)){
+	if (match = arrayParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else if (match = objectParser(input)) {
+	if (match = objectParser(input)) {
+		if (match.rest == "")
+			return match.token;
 		return match;
 	}
-	else
-		return null;
+	return null;
 }
-/*
-console.log(jsonParser('true,'));
-console.log(jsonParser('false,'));
-console.log(jsonParser('123'));
-console.log(jsonParser('1.34'));
-console.log(jsonParser('"abc"'));
-console.log(jsonParser('null'));
-console.log(jsonParser(' []'));
-console.log(jsonParser('[ 1, 3.14,  "abc"  ,null ,true,false , [1,2,3], [4,  5 ,6] ]'));
-*/
-//console.log(data);
-console.log(jsonParser(data).token);
-console.log(JSON.parse(data));
+
+// Displaying Parsed Data
+
+console.log(jsonParser(data));
