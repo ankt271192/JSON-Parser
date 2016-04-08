@@ -1,5 +1,5 @@
 # JSON-Parser
 
-#### Implementation In Javascript.
+#### Implementation In JavaScript.
 
-Takes input from a file "data.txt" and prints the parsed data.
+Takes JSON input from a file "data.txt" and prints the parsed data.
